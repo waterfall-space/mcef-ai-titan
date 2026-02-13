@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCEF AI | v85.0 Final Titan</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <style>
+        :root { --primary: #00ff88; --bg: #010101; --card: #0a0a0a; --text: #f0f0f0; --accent: #00a4ef; }
+        body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .mcef-box { background: var(--card); width: 95%; max-width: 850px; height: 95vh; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 0 80px rgba(0, 255, 136, 0.15); border: 1px solid #1a1a1a; }
+        #chat-logs { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+        .bubble { max-width: 90%; padding: 20px; border-radius: 18px; font-size: 14px; line-height: 1.7; position: relative; }
+        .thought { font-size: 11px; color: var(--accent); font-style: italic; margin-bottom: 12px; border-left: 3px solid var(--accent); padding-left: 12px; background: rgba(0, 164, 239, 0.08); padding: 12px; border-radius: 8px; }
+        .bot-msg { align-self: flex-start; background: #0d0d0d; border: 1px solid #222; box-shadow: 5px 5px 15px rgba(0,0,0,0.5); }
+        .user-msg { align-self: flex-end; background: #111; border: 1px solid var(--primary); color: var(--primary); }
+        .input-area { padding: 20px; display: flex; gap: 12px; background: #050505; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; border-top: 1px solid #1a1a1a; }
+        #userInput { flex: 1; padding: 18px; border-radius: 14px; border: 1px solid #333; background: #000; color: #fff; outline: none; font-size: 15px; }
+        .btn-mcef { padding: 15px 35px; background: var(--primary); border: none; color: #000; border-radius: 14px; font-weight: 900; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-mcef:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4); }
+        .scanning-line { width: 100%; height: 1px; background: var(--primary); position: absolute; top: 0; left: 0; animation: scanMove 2s infinite linear; opacity: 0.3; }
+        @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="mcef-box">
+    <div style="padding:15px; border-bottom:1px solid #1a1a1a; color:var(--primary); font-size:11px; font-weight:bold; text-align:center; letter-spacing: 3px;">MCEF AI v85.0 // ULTIMATE INTELLIGENCE</div>
+    <div id="chat-logs">
+        <div class="bubble bot-msg">
+            <div class="scanning-line"></div>
+            Sistem tam kapasite aktif Efe. Babana gösterilecek kadar akıllı, Microsoft'a satılacak kadar güçlüyüm. Sorularını bekliyorum.
+        </div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Herhangi bir konuyu derinlemesine araştır..." autocomplete="off">
+        <button class="btn-mcef" onclick="mcefProcess()">ARAŞTIR</button>
+    </div>
+</div>
+
+<script>
+    async function mcefProcess() {
+        const input = document.getElementById('userInput');
+        const logs = document.getElementById('chat-logs');
+        let raw = input.value.trim();
+        if(!raw) return;
+
+        logs.innerHTML += `<div class="bubble user-msg">${raw}</div>`;
+        input.value = "";
+        
+        const th = document.createElement("div");
+        th.className = "bubble bot-msg";
+        th.innerHTML = `
+            <div class="scanning-line"></div>
+            <div class="thought">Ağ protokolleri taranıyor... Global veritabanları çapraz sorgulanıyor... Analiz derinleştiriliyor...</div>
+            <div class="res-content">...</div>`;
+        logs.appendChild(th);
+        logs.scrollTop = logs.scrollHeight;
+
+        let low = raw.toLowerCase();
+        let contentBox = th.querySelector(".res-content");
+
+        setTimeout(async () => {
+            try {
+                // Derin Araştırma Modu: Birden fazla arama terimiyle Wikipedia'yı zorla
+                let res = await fetch(`https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(low)}`);
+                let data = await res.json();
+
+                if (data.extract) {
+                    contentBox.innerHTML = `<b>${data.title}:</b><br><br>${data.extract}`;
+                } else {
+                    // İkinci şans: Kelimelere böl ve en önemli kısmını ara
+                    let keywords = low.split(" ");
+                    let secondRes = await fetch(`https://tr.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(keywords[0])}`);
+                    let secondData = await secondRes.json();
+                    
+                    if (secondData.extract) {
+                        contentBox.innerHTML = `Tam eşleşme aranıyor... En yakın sonuç:<br><br><b>${secondData.title}:</b> ${secondData.extract}`;
+                    } else {
+                        contentBox.innerHTML = `Efe, web üzerindeki tüm sunucuları taradım. "${raw}" hakkında veriye ulaşılamadı. Lütfen konuyu biraz daha açıklar mısın?`;
+                    }
+                }
+            } catch(e) { 
+                contentBox.innerHTML = "Bağlantı protokolü hatası! İnternet erişimi kısıtlı olabilir."; 
+            }
+            logs.scrollTop = logs.scrollHeight;
+        }, 1800);
+    }
+    document.getElementById("userInput").addEventListener("keypress", (e) => { if(e.key === "Enter") mcefProcess(); });
+</script>
+
+</body>
+</html>
